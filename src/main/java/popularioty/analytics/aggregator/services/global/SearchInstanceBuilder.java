@@ -5,12 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.directory.shared.kerberos.codec.krbCredInfo.actions.StorePRealm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import popularioty.commons.exception.PopulariotyException;
 import popularioty.commons.services.searchengine.factory.SearchEngineFactory;
 import popularioty.commons.services.searchengine.factory.SearchProvider;
+import popularioty.commons.services.storageengine.factory.StorageFactory;
+import popularioty.commons.services.storageengine.factory.StorageProvider;
 
 public class SearchInstanceBuilder 
 {
@@ -24,12 +27,13 @@ public class SearchInstanceBuilder
 	 */
 	private Map<String,SearchProvider> searchProviders;
 	
-
+	private Map<String,StorageProvider> storageProviders;
+	
 	
 	protected SearchInstanceBuilder()
 	{
 		searchProviders = new HashMap<>();
-
+		storageProviders = new HashMap<>();
 	}
 	/**
 	 * Looks for the search provider in its Map
@@ -44,13 +48,20 @@ public class SearchInstanceBuilder
 			
 			Map properties = loadProperties(configurationFile);
 			SearchProvider provider = SearchEngineFactory.getSearchProvider((String) properties.get("search.engine"));
+			  
+			StorageProvider store = StorageFactory.getStorageProvider((String) properties .get("storage.engine"));
+		 	
 			try {
+				store.init(properties);
+				properties.put("storage.provider.object", store);	
 				provider.init(properties);
 				
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.err.println("could not initialize searchprovider properly with properties file"+configurationFile);
 			}
+			
+			storageProviders.put(configurationFile, store);
 			searchProviders.put(configurationFile,provider);
 			return provider;
 	}
