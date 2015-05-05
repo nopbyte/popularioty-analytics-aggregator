@@ -78,7 +78,7 @@ public class SearchInstanceBuilder
 		try {
 				props.load(getClass().getClassLoader().getResourceAsStream(file));
 				for (String key : props.stringPropertyNames()) {
-	                properties.put(key, props.getProperty(key));
+					properties.put(key, props.getProperty(key));
 	            }
 				
 		} catch (IOException e) {

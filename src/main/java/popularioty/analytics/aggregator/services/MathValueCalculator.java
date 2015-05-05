@@ -17,17 +17,19 @@ public class MathValueCalculator {
 	 * @return
 	 * @throws PopulariotyException 
 	 */
-	public float getCurrentEntityDimensionValue(String entityType, String id, String repType, float f)
+	public float getCurrentEntityDimensionValue(String entityType, String id, String repType, float newvalue)
 	{
-		float  ret = f;
+		float  ret = newvalue;
 		try{
-			if(id.contains("#") && entityType.equals(EntityTypeConstants.ENTITY_TYPE_SO_STREAM))
-				id = id.replaceAll("#", "");
+			//TODO remove this after checking the changes on the pig scripts...
+			if(id.contains("#!") && entityType.equals(EntityTypeConstants.ENTITY_TYPE_SO_STREAM))
+				id = id.replaceAll("#!", "-");
 			Map<String,Object> data =search.getSubReputationSearch(id, entityType, repType);
 			if(data != null)
 			{
-				Float f1 = (Float) data.get("value"); // when this is a user... look for 
-				ret = (float) (f1.floatValue()*0.9+0.1*f);
+				
+				float oldValue = (float) Float.parseFloat((data.get("value").toString()));
+				ret = (float) (oldValue*0.9+newvalue*0.1);
 			}			
 		}
 		catch(Exception e)
@@ -50,15 +52,16 @@ public class MathValueCalculator {
 	}
 	
 	
-	public float getCurrentOverAllValue(String entityType, String id, String repType, float oldvalue) throws PopulariotyException
+	public float getCurrentOverAllValue( String id, String entityType, float newvalue) 
 	{
-		float ret = oldvalue;
+		float ret = newvalue;
 		try{
 			
 			Map<String,Object> data =search.getFinalReputationValueForEntity(entityType, id);
 			if(data !=null)
 			{
-				
+				float oldValue = (float) Float.parseFloat((data.get("reputation").toString()));
+				ret = (float) (oldValue*0.9+newvalue*0.1);
 			}
 		}
 		catch(Exception e)
@@ -69,7 +72,11 @@ public class MathValueCalculator {
 				System.out.println(((PopulariotyException) e).getHTTPErrorCode());
 				System.out.println(((PopulariotyException) e).getMessage());
 				System.out.println("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
-				throw e;
+			}
+			else{
+				System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+				e.printStackTrace();
+				System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 			}
 		}
 		return ret;

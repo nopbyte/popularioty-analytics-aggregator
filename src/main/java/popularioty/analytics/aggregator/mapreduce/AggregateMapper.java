@@ -63,10 +63,11 @@ public class AggregateMapper extends Mapper<Text, Text, AggregationKey, Aggregat
 
 	private void emitToSOStreamAndDeveloper( Context context,String entityId, StringTokenizer t) throws IOException, InterruptedException 
 	{
+		String typeOfVote = t.nextToken();
 		String popularity = t.nextToken();
 		String activity = t.nextToken();
-		String typeOfVote = t.nextToken();
-		AggregationKey streamKey = new AggregationKey(entityId,EntityTypeConstants.ENTITY_TYPE_SO);
+		
+		AggregationKey streamKey = new AggregationKey(entityId,EntityTypeConstants.ENTITY_TYPE_SO_STREAM);
 		streamKey.setEntityId(entityId);
 		
 		if(typeOfVote.equals("runtime"))
