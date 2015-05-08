@@ -44,7 +44,7 @@ public class AggregationKey implements WritableComparable<AggregationKey>{
 	public String toString() {
 
 		return entityType+"\t"+
-				entityId+"\t";
+				entityId;
 	}
 
 	@Override
