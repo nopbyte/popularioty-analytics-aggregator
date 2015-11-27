@@ -7,35 +7,99 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import popularioty.analytics.aggregator.services.MathValueCalculator;
+import popularioty.analytics.aggregator.services.global.FeedbackReputationManager;
+import popularioty.analytics.aggregator.services.global.ServiceReputationManager;
+import popularioty.analytics.aggregator.services.global.StreamReputationManager;
 import popularioty.analytics.aggregator.writable.AggregationKey;
 import popularioty.analytics.aggregator.writable.AggregationVote;
 import popularioty.commons.constants.EntityTypeConstants;
+import popularioty.commons.exception.PopulariotyException;
 
 public class AggregateMapper extends Mapper<Text, Text, AggregationKey, AggregationVote>
 {
 
+	/*
+	 * 1	user_giving_rating	feedback	1
+	 * == userid user_giving_rating feedback count_meta_feedbacks
+	 * owner_id	developer	feedback	5.203199863433838	4
+	 *  == userid feedback repvalue count
+	 * 
+	 * 
+	 * userid developer repvalue count
+		
+	 * service_instance1	service_instance	feedback	6.804800033569336	27.219199657440186	4
+	 * runtime
+	 * (id,service_instance,activity,numok,numwrong)
+	 * (0c739e21-decbb7959-4010-b244-61237789,service_instance,popularity,rating,count)
+*/
 	
 	private MathValueCalculator calc = new MathValueCalculator();
+	private StreamReputationManager streamReputationManager = new StreamReputationManager();
+	private ServiceReputationManager serviceReputationManager = new ServiceReputationManager();
+	private FeedbackReputationManager feedbackManager = new FeedbackReputationManager();
 	
 	protected void map(Text key, Text value, Context context)
 		      throws java.io.IOException, InterruptedException 
 	{
-		String entityId = key.toString();
-		String values = value.toString();
-		StringTokenizer t = new StringTokenizer(values);
-		String type = t.nextToken();
-		if(type.equals(EntityTypeConstants.ENTITY_TYPE_SO_STREAM))
-			emitToSOStreamAndDeveloper(context, entityId, t);
-		if(type.equals(EntityTypeConstants.ENTITY_TYPE_SO))
-			emitToSOAndDeveloper(context, entityId, t);
+		try{
+
+			
+			String entityId = key.toString();
+			String values = value.toString();
+			StringTokenizer t = new StringTokenizer(values);
+			String type = t.nextToken();
+			String reputationType = t.nextToken();
+			if(reputationType.equals("feedback")){
+				handleFeedback(entityId, type, t, context);
+			}else if(reputationType.equals("activity")){
+				handleActivity(entityId, type, t, context);
+			}else if(reputationType.equals("popularity")){
+				handlePopularity(entityId, type, t, context);
+			}
+			else{
+				System.err.println("unhandled type of reputation in aggregation! "+reputationType);
+			}
+		}catch(Exception e){
+			System.out.println(PopulariotyException.getStackTrace(e));
+			System.err.println("error: "+e.getMessage());
+		}
+		
+		
+		
+		
 		
 		
 	
 	}
-	//TODO include emmision to the developer...
+	private void handlePopularity(String entityId, String type, StringTokenizer t, Context context) throws PopulariotyException, IOException, InterruptedException {
+		if(type.equals(EntityTypeConstants.ENTITY_TYPE_SO_STREAM))
+			streamReputationManager.handlePopularity( entityId.replace("#!", "-"),  type,  t, context);
+		else if(type.equals(EntityTypeConstants.ENTITY_TYPE_SERVICE))
+			serviceReputationManager.handlePopularity(entityId, type, t, context);
+		else
+			System.err.println("undefined entity type for popularity "+type);
+			
+	}
+	
+	private void handleActivity(String entityId, String type, StringTokenizer t, Context context) throws PopulariotyException, IOException, InterruptedException {
+		if(type.equals(EntityTypeConstants.ENTITY_TYPE_SO_STREAM))
+			streamReputationManager.handleAcitity( entityId.replace("#!", "-"), type,  t, context);
+		else if(type.equals(EntityTypeConstants.ENTITY_TYPE_SERVICE))
+			serviceReputationManager.handleActivity(entityId, type, t, context);
+		else
+			System.err.println("undefined entity type for activity "+type);
+			
+	}
+	private void handleFeedback(String entityId, String entityType,
+			StringTokenizer t, Context context) throws PopulariotyException, IOException, InterruptedException {
+		feedbackManager .handleFeedback(entityId, entityType, t, context);
+	}
+	
+	
+	/*
 	private void emitToSOAndDeveloper( Context context,String entityId, StringTokenizer t) throws IOException, InterruptedException 
 	{
-		AggregationKey userKey = new AggregationKey(entityId,EntityTypeConstants.ENTITY_TYPE_USER);
+		AggregationKey userKey = new AggregationKey(entityId,EntityTypeConstants.ENTITY_TYPE_USER_DEVELOPER);
 		AggregationKey soKey = new AggregationKey(entityId,EntityTypeConstants.ENTITY_TYPE_SO);
 		
 		String typeOfVote = t.nextToken();
@@ -87,7 +151,7 @@ public class AggregateMapper extends Mapper<Text, Text, AggregationKey, Aggregat
 			context.write(streamKey, vote);
 		}
 		
-	}
+	}*/
 	
 	
 }

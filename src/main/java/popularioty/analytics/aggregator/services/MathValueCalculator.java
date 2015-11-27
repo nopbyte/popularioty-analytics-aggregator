@@ -36,15 +36,15 @@ public class MathValueCalculator {
 		{
 			if(e instanceof PopulariotyException)
 			{
-				System.out.println("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+				//System.out.println("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
 				System.out.println(((PopulariotyException) e).getHTTPErrorCode());
 				System.out.println(((PopulariotyException) e).getMessage());
-				System.out.println("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+				//System.out.println("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
 			}
 			else{
-				System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+				//System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 				e.printStackTrace();
-				System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+				//System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 			}
 		}
 		
@@ -52,33 +52,5 @@ public class MathValueCalculator {
 	}
 	
 	
-	public float getCurrentOverAllValue( String id, String entityType, float newvalue) 
-	{
-		float ret = newvalue;
-		try{
-			
-			Map<String,Object> data =search.getFinalReputationValueForEntity(entityType, id);
-			if(data !=null)
-			{
-				float oldValue = (float) Float.parseFloat((data.get("reputation").toString()));
-				ret = (float) (oldValue*0.9+newvalue*0.1);
-			}
-		}
-		catch(Exception e)
-		{
-			if(e instanceof PopulariotyException)
-			{
-				System.out.println("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
-				System.out.println(((PopulariotyException) e).getHTTPErrorCode());
-				System.out.println(((PopulariotyException) e).getMessage());
-				System.out.println("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
-			}
-			else{
-				System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-				e.printStackTrace();
-				System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-			}
-		}
-		return ret;
-	}
+	
 }
