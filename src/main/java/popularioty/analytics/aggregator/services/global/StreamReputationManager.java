@@ -108,20 +108,53 @@ public class StreamReputationManager extends AbstractReputationManager{
 
 	/*14375534417693d7c484847884f85b80d5ae617f27618#!thermopile       service_object_stream   popularity      2       56164
 	  * */
-	public void handlePopularity(String entityId, String type, StringTokenizer t, Context context){
+	public void handlePopularity(String entityId, String type, StringTokenizer t, Context context)
+		throws PopulariotyException, IOException, InterruptedException {
+		 
 		
-		 float reputation= (Float.parseFloat(t.nextToken()));
-		long events = (Long.parseLong(t.nextToken()));
+		long previousCount = 1;
+		float previousScore = (float) 5.5;
+		//according to Dirichlet Reputation Systems from Josang. et. al.
+		float Lambda = (float) 0.9;
 		
-		System.out.println();
-		System.out.println();
-		System.out.println();
-		System.out.println();
-		System.out.println("popularity of Stream!");
-		System.out.println();
-		System.out.println();
-		System.out.println();
-		//TODO output keys for reduce
+		Map<String, Object> res;
+		try {
+			res = query.getSubReputationSearch(entityId, type, EntityTypeConstants.REPUTATION_TYPE_POPULARITY);
+			if(res != null)
+			{
+				previousScore = (Float.parseFloat((String) res.get(VALUE).toString()));
+				if(res.containsKey(COUNT))
+					previousCount = (Long.parseLong((String) res.get(COUNT).toString()));
+				
+			}
+		} catch (PopulariotyException e) {
+			e.printStackTrace();
+		}
+						
+		//we can still keep going since initialization guarantees an array with unities.
+		float current = Float.parseFloat(t.nextToken());
+		long currentMessages = Long.parseLong(t.nextToken());
+		long totalMessages  = previousCount +  currentMessages;
+		
+		float value = (float)(((float)previousScore)*((float)previousCount));
+		value += (float)((float)current*(float)currentMessages); 
+		
+		value = (float)((float)value/(float)totalMessages);
+		
+		Map<String, Object> finalDoc = new HashMap<String, Object>();
+		
+		finalDoc.put(COUNT, currentMessages+previousCount);
+		finalDoc.put(VALUE, value);
+		finalDoc.put("entity_type", type);
+		finalDoc.put("entity_id", entityId);
+		finalDoc.put("date", System.currentTimeMillis());
+		finalDoc.put("sub_reputation_type",EntityTypeConstants.REPUTATION_TYPE_POPULARITY);
+				
+		if(type.equals(EntityTypeConstants.ENTITY_TYPE_SO_STREAM)){
+			emmitForEntity(entityId.split("-")[0], EntityTypeConstants.ENTITY_TYPE_SO,  AggregationVote.TYPE_OF_VOTE_POPULARITY, value, context);
+		}
+		query.storeSubReputationDocument(UUID.randomUUID().toString().replaceAll("-", ""), finalDoc);
+		emmitForEntity(entityId, type, AggregationVote.TYPE_OF_VOTE_POPULARITY, value, context);
 		
 	}
 	

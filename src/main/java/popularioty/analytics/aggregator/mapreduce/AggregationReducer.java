@@ -172,14 +172,15 @@ public class AggregationReducer extends Reducer< AggregationKey, AggregationVote
 				finalDoc.put("value", finalRep);
 				finalDoc.put("reputation", finalRep);
 				query.storeFinalReputationDocument(UUID.randomUUID().toString().replaceAll("-", ""), finalDoc);
-				emmitId(key, context);
+				emmitId(key, finalRep, context);
 
 				
 	}
 
 
-	private void emmitId(AggregationKey exportKey, Context context) throws IOException, InterruptedException {
+	private void emmitId(AggregationKey exportKey, double reputation,  Context context) throws IOException, InterruptedException {
 		Text data = new Text();
+		data.set(Double.toString(reputation));
 		context.write(exportKey, data);		
 	}
 
