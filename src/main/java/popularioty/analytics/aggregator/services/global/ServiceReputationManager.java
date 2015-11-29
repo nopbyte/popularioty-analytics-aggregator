@@ -19,8 +19,7 @@ public class ServiceReputationManager extends AbstractReputationManager{
 
 	private static String EVENTS_OK = "events_ok";
 	private static String EVENTS_WRONG = "events_wrong";
-	private static String COUNT = "count";
-	private static String VALUE = "value";
+
 	
 	 /*(id,service_instance,activity,numok,numwrong)
 	  * src_id as service_id, 'service_instance' as type, 'activity' as reptype,serviceactok as ok, serviceactwrong as wrong;

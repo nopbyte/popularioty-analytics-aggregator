@@ -42,8 +42,7 @@ public class AggregateMapper extends Mapper<Text, Text, AggregationKey, Aggregat
 		      throws java.io.IOException, InterruptedException 
 	{
 		try{
-
-			
+		
 			String entityId = key.toString();
 			String values = value.toString();
 			StringTokenizer t = new StringTokenizer(values);

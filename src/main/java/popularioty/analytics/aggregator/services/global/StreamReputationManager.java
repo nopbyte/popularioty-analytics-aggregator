@@ -24,8 +24,7 @@ public class StreamReputationManager extends AbstractReputationManager{
 	private static String KEY_DISC_JS = "discard_js";
 	private static String KEY_DISC_POLICY = "discard_policy";
 	private static String KEY_DISC_FILTER = "discard_filter";
-	private static String COUNT = "count";
-	private static String VALUE = "value";
+
 
 
 	//vote.setTypeOfVote()
@@ -69,12 +68,18 @@ public class StreamReputationManager extends AbstractReputationManager{
 						
 		//we can still keep going since initialization guarantees an array with 1s.
 		
+		long cevents = Long.parseLong(t.nextToken()); 
+		long cne   = Long.parseLong(t.nextToken());
+		long cdiscjs = Long.parseLong(t.nextToken());
+		long cdiscpolicy  = Long.parseLong(t.nextToken());
+		long cdiscfilter = Long.parseLong(t.nextToken());
+		long ccount = cevents +  cne  +  cdiscjs + cdiscpolicy  +  cdiscfilter;
 		
-		events += Long.parseLong(t.nextToken()); 
-		ne   += Long.parseLong(t.nextToken());
-		discjs += Long.parseLong(t.nextToken());
-		discpolicy  += Long.parseLong(t.nextToken());
-		discfilter += Long.parseLong(t.nextToken());
+		events += cevents; 
+		ne   += cne;
+		discjs += cdiscjs;
+		discpolicy  += cdiscpolicy;
+		discfilter += cdiscfilter;
 		count = events +  ne  +  discjs + discpolicy  +  discfilter;		
 		
 		float EpDelivered = (events+ne);
@@ -102,6 +107,8 @@ public class StreamReputationManager extends AbstractReputationManager{
 		
 		if(type.equals(EntityTypeConstants.ENTITY_TYPE_SO_STREAM)){
 			emmitForEntity(entityId.split("-")[0], EntityTypeConstants.ENTITY_TYPE_SO,  AggregationVote.TYPE_OF_VOTE_ACTIVITY, value, context);
+			createSubReputationDocForEntity(entityId.split("-")[0], EntityTypeConstants.ENTITY_TYPE_SO, ccount, value,  AggregationVote.TYPE_OF_VOTE_ACTIVITY);
+
 		}		
 		emmitForEntity(entityId, type, AggregationVote.TYPE_OF_VOTE_ACTIVITY, value, context);	
 	}
@@ -151,12 +158,16 @@ public class StreamReputationManager extends AbstractReputationManager{
 		finalDoc.put("sub_reputation_type",EntityTypeConstants.REPUTATION_TYPE_POPULARITY);
 				
 		if(type.equals(EntityTypeConstants.ENTITY_TYPE_SO_STREAM)){
-			emmitForEntity(entityId.split("-")[0], EntityTypeConstants.ENTITY_TYPE_SO,  AggregationVote.TYPE_OF_VOTE_POPULARITY, value, context);
+			String soid = entityId.split("-")[0];
+			emmitForEntity(soid, EntityTypeConstants.ENTITY_TYPE_SO,  AggregationVote.TYPE_OF_VOTE_POPULARITY, value, context);
+			createSubReputationDocForEntity(soid, EntityTypeConstants.ENTITY_TYPE_SO,currentMessages , current, EntityTypeConstants.REPUTATION_TYPE_POPULARITY);
 		}
 		query.storeSubReputationDocument(UUID.randomUUID().toString().replaceAll("-", ""), finalDoc);
 		emmitForEntity(entityId, type, AggregationVote.TYPE_OF_VOTE_POPULARITY, value, context);
 		
 	}
+
+	
 	
 
 }
